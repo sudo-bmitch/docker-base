@@ -1,0 +1,13 @@
+version: '3'
+services:
+  nginx:
+    image: localhost:5000/nginx:${NGINX_VER:-mainline}
+    ports:
+    - 8080:8080
+    volumes:
+    - ./html:/usr/share/nginx/html
+    - ./conf.d:/etc/nginx/conf.d
+    # start as root to automatically correct user permissions
+    user: "0:0"
+    # tty needed to have stdout permissions 
+    tty: true

@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# check for failing conditions
+
+# if no errors, exit 0 to indicate success, 1 for failure
+exit 0
+
