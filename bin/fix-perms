@@ -14,7 +14,7 @@ while getopts 'g:hru:' option; do
     u) opt_u="$OPTARG";;
   esac
 done
-shift `expr $OPTIND - 1`
+shift $(expr $OPTIND - 1)
 
 if [ $# -lt 1 -o "$opt_h" = "1" -o \( -z "$opt_g" -a -z "$opt_u" \) ]; then
   echo "Usage: $(basename $0) [opts] path"
@@ -49,8 +49,8 @@ set -e
 
 # update the uid
 if [ -n "$opt_u" ]; then
-  OLD_UID=`getent passwd "${opt_u}" | cut -f3 -d:`
-  NEW_UID=`ls -nd "$1" | awk '{print $3}'`
+  OLD_UID=$(getent passwd "${opt_u}" | cut -f3 -d:)
+  NEW_UID=$(stat -c "%u" "$1")
   if [ "$OLD_UID" != "$NEW_UID" ]; then
     echo "Changing UID of $opt_u from $OLD_UID to $NEW_UID"
     usermod -u "$NEW_UID" -o "$opt_u"
@@ -62,8 +62,8 @@ fi
 
 # update the gid
 if [ -n "$opt_g" ]; then
-  OLD_GID=`getent group "${opt_g}" | cut -f3 -d:`
-  NEW_GID=`ls -nd "$1" | awk '{print $4}'`
+  OLD_GID=$(getent group "${opt_g}" | cut -f3 -d:)
+  NEW_GID=$(stat -c "%g" "$1")
   if [ "$OLD_GID" != "$NEW_GID" ]; then
     echo "Changing GID of $opt_g from $OLD_GID to $NEW_GID"
     groupmod -g "$NEW_GID" -o "$opt_g"
