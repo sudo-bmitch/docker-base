@@ -1,5 +1,6 @@
 ARG DEBIAN_VER=9
-FROM debian:${DEBIAN_VER}
+ARG REGISTRY=docker.io
+FROM ${REGISTRY}/debian:${DEBIAN_VER}
 
 # Include apt-install
 COPY bin.debian/ /usr/bin/
@@ -35,10 +36,11 @@ ENTRYPOINT ["/usr/bin/entrypointd.sh"]
 CMD ["/bin/bash"]
 
 ARG IMAGE_VERSION=1.0.0
+ARG BASE_REPOSITORY=sudobmitch/base
 LABEL \
-    org.label-schema.docker.cmd="docker run -it --rm sudobmitch/base:debian" \
+    org.label-schema.docker.cmd="docker run -it --rm ${REGISTRY}/${BASE_REPOSITORY}:debian" \
     org.label-schema.description="Base image for debian" \
-    org.label-schema.name="bmitch3020/base:debian" \
+    org.label-schema.name="${REGISTRY}/${BASE_REPOSITORY}:debian" \
     org.label-schema.schema-version="1.0" \
     org.label-schema.url="https://github.com/sudo-bmitch/docker-images" \
     org.label-schema.vendor="Brandon Mitchell" \
