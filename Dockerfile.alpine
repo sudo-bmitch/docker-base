@@ -1,5 +1,6 @@
-ARG ALPINE_VERSION=3.5
-FROM alpine:${ALPINE_VERSION}
+ARG ALPINE_VERSION=3.9
+ARG REGISTRY=docker.io
+FROM ${REGISTRY}/alpine:${ALPINE_VERSION}
 
 # Include apk-install
 COPY bin.alpine/ /usr/bin/
@@ -38,10 +39,11 @@ ENTRYPOINT ["/usr/bin/entrypointd.sh"]
 CMD ["/bin/sh"]
 
 ARG IMAGE_VERSION=1.0.0
+ARG BASE_REPOSITORY=sudobmitch/base
 LABEL \
-    org.label-schema.docker.cmd="docker run -it --rm sudobmitch/base:alpine" \
+    org.label-schema.docker.cmd="docker run -it --rm ${REGISTRY}/${BASE_REPOSITORY}:alpine" \
     org.label-schema.description="Base image for alpine" \
-    org.label-schema.name="bmitch3020/base:alpine" \
+    org.label-schema.name="${REGISTRY}/${BASE_REPOSITORY}:alpine" \
     org.label-schema.schema-version="1.0" \
     org.label-schema.url="https://github.com/sudo-bmitch/docker-images" \
     org.label-schema.vendor="Brandon Mitchell" \
