@@ -7,6 +7,8 @@ These base images include:
 - `fix-perms` to match uid/gid of user inside container to a mounted volume
 - `gosu` to run commands as a non-root user after setup in the entrypoint
 - Secrets imported into environment variables 
+- `save-volume` and `load-volume` to cache and initialize volume data from the
+  image in scenarios where docker would not normally do this
 
 ## Platform specific additions
 
@@ -63,7 +65,47 @@ FROM your_base_image
 COPY --from=sudobmitch/base:scratch / /
 ```
 
-If you extend an alpine image, the shadow package needs to be installed.
+If you extend an alpine image, the shadow package needs to be installed for
+the fix-perms script. If you use volume caching with the `-d` option, rsync
+needs to be installed.
+
+## Volume Caching
+
+Volume caching scripts are useful for the following scenarios:
+
+- When docker does not initialize host volumes for you.
+- When using a tmpfs volume and need the content to be initialized.
+- When using a pre-initialized volume that needs to be updated on every startup
+  with data from the image.
+
+Caching is a two step process:
+
+1. Calling `RUN save-volume /path/to/dir` in your Dockerfile for any directory
+   to cache in the image. This directory will be moved into cache storage,
+   so make it the last step on this directory that you run during your build.
+2. Calling `load-volume /path/to/dir`, or use the `entrypointd.sh` which loads
+   all volumes you have previously saved with the flags passed to `save-volume`.
+
+The `save-volume` and `load-volume` scripts have the following options:
+
+- `-d`: delete files from the mounted volume, this uses/depends on `rsync`.
+- `-u`: update a volume even if it already exists. This overwrites any changes
+  in the volume, but does not delete or modify files that were not previously
+  cached.
+
+The `load-volume` script will:
+
+- Create a symlink if there is no volume mount to update.
+- If the `-d` flag was used, run `rsync` to reset the volume to the cached
+  state.
+- If the volume mount is empty or `-u` was used, run a `cp -a` to initialize
+  the volume.
+
+Note: caching a volume with the above steps results in the directory being
+moved which will double the size of the directory in the docker layers when
+performed as a separate build step. When possible, merge the `save-volume`
+step with any other commands used to create the volume folder. If copying
+files between stages in a multi-stage build, include `/.volume-cache`.
 
 ## Examples
 
@@ -71,6 +113,7 @@ The nginx example shows:
 
 - Extending the nginx image with the scratch base image
 - Running the application as uid 5000 inside the container
+- Volume caching to automatically populate host and tmpfs volumes
 - Entrypoint to automatically fix the uid to match the developer volume mount
 - Using curl for a healthcheck
 - For details on the need for a TTY when writing to /dev/stdout and /dev/stderr

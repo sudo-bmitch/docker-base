@@ -34,6 +34,11 @@ if [ "$(id -u)" != "0" ]; then
   exit 1
 fi
 
+if [ ! -e "$1" ]; then
+  echo "File or directory does not exist, skipping fix-perms: $1"
+  exit 0
+fi
+
 if ! type usermod >/dev/null 2>&1 || \
    ! type groupmod >/dev/null 2>&1; then
   if type apk /dev/null 2>&1; then

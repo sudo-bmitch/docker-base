@@ -5,8 +5,12 @@ services:
     ports:
     - 8080:8080
     volumes:
-    - ./html-vol:/usr/share/nginx/html
-    - ./conf.d:/etc/nginx/conf.d
+    - type: tmpfs
+      target: /usr/share/nginx/html
+    - type: bind
+      source: ./conf.d
+      target: /etc/nginx/conf.d
+      read_only: true
     # start as root to automatically correct user permissions
     user: "0:0"
     # tty needed to have stdout permissions 

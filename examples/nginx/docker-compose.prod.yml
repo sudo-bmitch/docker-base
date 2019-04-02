@@ -1,6 +1,6 @@
-version: '3'
+version: '3.6'
 services:
   nginx:
-    image: localhost:5000/nginx:${NGINX_VER:-mainline}
+    image: ${REPOSITORY:-localhost:5000}/nginx:${NGINX_VER:-mainline}
     ports:
     - 8080:8080

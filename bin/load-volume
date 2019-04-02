@@ -1,0 +1,90 @@
+#!/bin/sh
+
+# Copyright Brandon Mitchell
+# License: MIT
+
+set -e
+trap "{ exit 0; }" TERM INT
+cache_dir=/.volume-cache
+opt_a=0
+opt_d=0
+opt_h=0
+opt_u=0
+
+while getopts 'ahu' option; do
+  case $option in
+    a) opt_a=1;;
+    d) opt_d=1;;
+    h) opt_h=1;;
+    u) opt_u=1;;
+  esac
+done
+shift $(expr $OPTIND - 1)
+
+if [ \( $# -lt 1 -a "$opt_a" = 0 \) -o "$opt_h" = "1" ]; then
+  echo "Usage: $(basename $0) [opts] directory ..."
+  echo " -a: restore all volumes from previous save commands"
+  echo " -d: delete files from target that do not exist in the cache, requires rsync"
+  echo " -h: this help message"
+  echo " -u: mark volume to be always updated even if data exists"
+  echo "The -a option ignores all passed directories and other flags"
+  [ "$opt_h" = "1" ] && exit 0 ||  exit 1
+fi
+
+process_dir() {
+  dir="$1"
+  if [ ! -e "${dir}" ]; then
+    # no such file/directory, create a soft link
+    echo "Initializing volume as a soft link to cache: ${dir}"
+    ln -s "${cache_dir}/${dir}" "${dir}"
+  elif [ "$(stat -Lc %d:%i "${dir}")" = "$(stat -Lc %d:%i "${cache_dir}/${dir}")" ]; then
+    # check for identical device/inode (link)
+    # link exists, no volume mounted, skip setup
+    echo "Skipping volume load, target is linked to cache: ${dir}"
+    return
+  elif [ "$opt_d" = "1" ]; then
+    echo "Initializing volume with rsync: ${dir}"
+    rsync -a --delete "${cache_dir}/${dir}" "${dir}"
+  elif [ "$opt_u" = "1" -o -z "$(ls -A ${dir})" ]; then
+    if [ -d "${cache_dir}/${dir}" -a -d "${dir}" ]; then
+      echo "Initializing volume directory: ${dir}"
+      cp -a "${cache_dir}/${dir}/." "${dir}/"
+    elif [ -f "${cache_dir}/${dir}" -a -f "${dir}" ]; then
+      echo "Initializing volume file: ${dir}"
+      cp "${cache_dir}/${dir}" "${dir}"
+    else
+      echo "Error: volume cache source and destination type do not match."
+      echo "They must each be files or directories, not a mix."
+      exit 1
+    fi
+  elif [ -n "$(ls -A ${dir})" ]; then
+    echo "Skipping volume load, target contains data: ${dir}"
+  fi
+}
+
+if [ "$opt_a" = "1" ]; then
+  if [ ! -f "${cache_dir}/volume-list" ]; then
+    echo "No cached volumes to process, skipping load."
+    exit 0
+  fi
+  cat "${cache_dir}/volume-list" \
+  | while read saved; do
+    type=$(echo ${saved} | cut -f1 -d:)
+    dir=$(echo ${saved} | cut -f2 -d:)
+    opt_d=0
+    opt_u=0
+    if [ "${type}" = "DELETE" ]; then
+      opt_d=1
+    elif [ "${type}" = "UPDATE" ]; then
+      opt_u=1
+    fi
+    process_dir "${dir}"
+  done
+  touch "${cache_dir}/volume-list.already-run"
+else
+  for dir in $*; do
+    process_dir "${dir}"
+  done
+fi
+
+exit 0
