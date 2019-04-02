@@ -1,0 +1,48 @@
+#!/bin/sh
+
+# Copyright Brandon Mitchell
+# License: MIT
+
+set -e
+trap "{ exit 0; }" TERM INT
+cache_dir=/.volume-cache
+opt_d=0
+opt_h=0
+opt_u=0
+
+while getopts 'dhu' option; do
+  case $option in
+    d) opt_d=1;;
+    h) opt_h=1;;
+    u) opt_u=1;;
+  esac
+done
+shift $(expr $OPTIND - 1)
+
+if [ $# -lt 1 -o "$opt_h" = "1" ]; then
+  echo "Usage: $(basename $0) [opts] directory ..."
+  echo " -d: mark volume to be emptied before copying, requires rsync"
+  echo " -h: this help message"
+  echo " -u: mark volume to be always updated even if data exists"
+  [ "$opt_h" = "1" ] && exit 0 ||  exit 1
+fi
+
+if [ ! -d "${cache_dir}" ]; then
+  mkdir -p "${cache_dir}"
+fi
+
+for dir in $*; do
+  type="INIT"
+  parent=$(dirname ${dir})
+  mkdir -p "${cache_dir}/${parent}"
+  mv "${dir}" "${cache_dir}/${parent}/"
+  if [ "$opt_d" = "1" ]; then
+    type="DELETE"
+  elif [ "$opt_u" = "1" ]; then
+    type="UPDATE"
+  fi
+  echo "${type}:${dir}" >>"${cache_dir}/volume-list"
+  echo "Saved directory for volume: ${dir}"
+done
+
+exit 0

@@ -6,7 +6,8 @@ COPY bin.debian/ /usr/bin/
 
 RUN apt-install \
       ca-certificates \
-      curl
+      curl \
+      rsync
 
 # Install wait-for-it.sh
 RUN curl -sSL https://github.com/vishnubob/wait-for-it/raw/master/wait-for-it.sh >/usr/bin/wait-for-it.sh \

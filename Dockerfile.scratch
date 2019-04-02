@@ -11,6 +11,8 @@ COPY --from=build \
      /usr/bin/secret-vars \
      /usr/bin/entrypointd.sh \
      /usr/bin/healthcheckd.sh \
+     /usr/bin/load-volume \
+     /usr/bin/save-volume \
      /usr/bin/
 
 COPY --from=build /etc/entrypoint.d/  /etc/entrypoint.d/
