@@ -15,7 +15,7 @@ common_args="${common_args} --label org.label-schema.vcs-url=${vcs_url}"
 common_args="${common_args} --build-arg REGISTRY=${REGISTRY}"
 common_args="${common_args} --build-arg BASE_REPOSITORY=${BASE_REPOSITORY}"
 
-docker build ${common_args} -t ${REGISTRY}/${BASE_REPOSITORY}/base:debian  -f Dockerfile.debian  .
-docker build ${common_args} -t ${REGISTRY}/${BASE_REPOSITORY}/base:alpine  -f Dockerfile.alpine  .
-docker build ${common_args} -t ${REGISTRY}/${BASE_REPOSITORY}/base:scratch -f Dockerfile.scratch .
+docker build ${common_args} -t ${REGISTRY}/${BASE_REPOSITORY}/base:debian  --target debian-base  .
+docker build ${common_args} -t ${REGISTRY}/${BASE_REPOSITORY}/base:alpine  --target alpine-base  .
+docker build ${common_args} -t ${REGISTRY}/${BASE_REPOSITORY}/base:scratch --target scratch-base .
 
