@@ -9,6 +9,7 @@ These base images include:
 - Secrets imported into environment variables 
 - `save-volume` and `load-volume` to cache and initialize volume data from the
   image in scenarios where docker would not normally do this
+- `stop-on-trigger` which can stop the container on a condition
 
 ## Platform specific additions
 
@@ -107,6 +108,25 @@ moved which will double the size of the directory in the docker layers when
 performed as a separate build step. When possible, merge the `save-volume`
 step with any other commands used to create the volume folder. If copying
 files between stages in a multi-stage build, include `/.volume-cache`.
+
+## Stop On Trigger
+
+The `stop-on-trigger` script can be used to stop a container on a condition.
+This would be launched as a background process in an entrypoint script. When
+the condition is met, all processes are sent a SIGTERM, followed by a delay,
+and then a SIGKILL. However, pid 1 will not receive this signal inside of the
+container so you need to use `tini` to run your app as a child pid. This is
+done by setting `ENV USE_INIT=1` in the image when using entrypointd.sh. A
+sample entrypointd script would look like:
+
+```
+#!/bin/sh
+stop-on-trigger -m /etc/certs/host.pem
+```
+
+Which would stop the container when the file is modified, and any container
+restart policy would result in a new container running, using that new
+certificate file.
 
 ## Examples
 

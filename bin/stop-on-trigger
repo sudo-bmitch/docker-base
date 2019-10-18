@@ -1,0 +1,86 @@
+#!/bin/sh
+
+# Copyright Brandon Mitchell
+# License: MIT
+
+usage() {
+  echo "Usage: $(basename $0) [opts]"
+  echo " -e file: restart when file exists (file will be deleted)"
+  echo " -h: this help message"
+  echo " -m file: restart when file modified"
+  echo " -s time: sleep timeout between polling (in seconds)"
+  echo " -t time: timeout to wait for graceful termination (in seconds)"
+  echo "At least one triggering option must be specified (-e, -m)."
+  echo "This script is only supported inside of docker containers."
+  echo "When the condition is met, all processes will be sent SIGTERM, followed"
+  echo "by SIGKILL after a $opt_t second timeout"
+  [ "$opt_h" = "1" ] && exit 0 ||  exit 1
+}
+
+set -e
+trap "{ exit 0; }" TERM INT
+opt_e=""
+opt_m=""
+opt_h=0
+opt_s=1
+opt_t=10
+
+while getopts 'e:hm:s:t:' option; do
+  case $option in
+    e) opt_e="$OPTARG";;
+    h) opt_h=1;;
+    m) opt_m="$OPTARG";;
+    s) opt_s="$OPTARG";;
+    t) opt_t="$OPTARG";;
+  esac
+done
+shift $(expr $OPTIND - 1)
+
+if [ $# -gt 0 -o \( -z "$opt_e" -a -z "$opt_m" \) ]; then
+  usage
+fi
+
+if ! grep -q '1:name=systemd:/docker/' </proc/self/cgroup; then
+  echo "Error: this script is only supported from within a docker container" >&2
+  exit 1
+fi
+
+handle_trigger() {
+  kill -TERM -1 # kill all processes with SIGTERM
+  sleep "$opt_t" # wait for graceful shutdown
+  kill -KILL -1 # kill all processes with SIGKILL
+  kill -KILL 0  # kill this command
+}
+
+check_exists() {
+  while [ ! -f "$opt_e" ]; do
+    sleep "$opt_s"
+  done
+  echo "File exists, killing container: $opt_e" >&2
+  rm "$opt_e"
+  handle_trigger
+}
+
+check_modify() {
+  if [ ! -f "$opt_m" ]; then
+    echo "Error: file does not exist: $opt_m"
+    exit 2
+  fi
+  start_time=$(stat -Lc "%Y" "$opt_m")
+  while [ -f "$opt_m" -a "$start_time" = "$(stat -Lc "%Y" "$opt_m")" ]; do
+    sleep "$opt_s"
+  done
+  echo "File modified, killing container: $opt_m" >&2
+  handle_trigger
+}
+
+if [ -n "$opt_e" ]; then
+  check_exists
+elif [ -n "$opt_m" ]; then
+  check_modify
+else
+  echo "Error: No option specified" >&2
+  usage
+fi
+
+
