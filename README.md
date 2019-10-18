@@ -42,7 +42,8 @@ Alpine base image includes:
 - `USE_INIT`: If set to any non-empty value, tini will be used to run the
   command, providing repaing of zombie processes
 - `RUN_AS`: If set to any non-empty value, gosu will be used to drop privledges
-  from root to the requested user
+  from root to the requested user (see potential issues writing to /dev/stdout
+  below)
 
 ## Converting Secrets to Environment Variables
 
@@ -116,6 +117,12 @@ The nginx example shows:
 - Volume caching to automatically populate host and tmpfs volumes
 - Entrypoint to automatically fix the uid to match the developer volume mount
 - Using curl for a healthcheck
-- For details on the need for a TTY when writing to /dev/stdout and /dev/stderr
-  see: https://github.com/moby/moby/issues/31243#issuecomment-406879017
+
+## Errors Writing to /dev/stdout
+
+There are scenarios where writing to /dev/stdout and /dev/stderr may fail with
+permission problems when the container starts as root and changes to another
+user. Should you encounter this, try to add the user to the tty group and
+configure the container with a tty. See the following issue for more details:
+https://github.com/moby/moby/issues/31243#issuecomment-406879017
 
