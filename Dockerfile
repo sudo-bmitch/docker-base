@@ -117,6 +117,7 @@ COPY --from=debian-base \
      /usr/bin/healthcheckd.sh \
      /usr/bin/load-volume \
      /usr/bin/save-volume \
+     /usr/bin/stop-on-trigger \
      /usr/bin/
 
 COPY --from=debian-base /etc/entrypoint.d/  /etc/entrypoint.d/
