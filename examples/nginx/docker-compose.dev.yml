@@ -9,5 +9,3 @@ services:
     - ./conf.d:/etc/nginx/conf.d
     # start as root to automatically correct user permissions
     user: "0:0"
-    # tty needed to have stdout permissions 
-    tty: true
