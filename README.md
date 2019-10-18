@@ -121,7 +121,7 @@ sample entrypointd script would look like:
 
 ```
 #!/bin/sh
-stop-on-trigger -m /etc/certs/host.pem
+stop-on-trigger -m /etc/certs/host.pem &
 ```
 
 Which would stop the container when the file is modified, and any container
