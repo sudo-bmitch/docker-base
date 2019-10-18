@@ -14,6 +14,7 @@ COPY --from=build \
      /usr/bin/healthcheckd.sh \
      /usr/bin/load-volume \
      /usr/bin/save-volume \
+     /usr/bin/stop-on-trigger \
      /usr/bin/
 
 COPY --from=build /etc/entrypoint.d/  /etc/entrypoint.d/
