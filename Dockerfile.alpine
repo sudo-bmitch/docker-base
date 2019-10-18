@@ -1,6 +1,6 @@
-ARG ALPINE_VERSION=3.9
+ARG ALPINE_VER=3.9
 ARG REGISTRY=docker.io
-FROM ${REGISTRY}/alpine:${ALPINE_VERSION}
+FROM ${REGISTRY}/alpine:${ALPINE_VER}
 
 # Include apk-install
 COPY bin.alpine/ /usr/bin/
@@ -16,14 +16,14 @@ RUN curl -sSL https://github.com/vishnubob/wait-for-it/raw/master/wait-for-it.sh
  && chmod 755 /usr/bin/wait-for-it.sh
 
 # Install tini
-ARG TINI_VERSION=v0.16.1
-RUN curl -sSL https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini >/usr/bin/tini \
+ARG TINI_VER=v0.16.1
+RUN curl -sSL https://github.com/krallin/tini/releases/download/${TINI_VER}/tini >/usr/bin/tini \
  && chmod 755 /usr/bin/tini
 
 # Install gosu
-ARG GOSU_VERSION=1.10
+ARG GOSU_VER=1.10
 ARG GOSU_ARCH=amd64
-RUN curl -sSL "https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-${GOSU_ARCH}" >/usr/bin/gosu \
+RUN curl -sSL "https://github.com/tianon/gosu/releases/download/${GOSU_VER}/gosu-${GOSU_ARCH}" >/usr/bin/gosu \
  && chmod 755 /usr/bin/gosu \
  && gosu nobody true
 
@@ -38,7 +38,7 @@ ENTRYPOINT ["/usr/bin/entrypointd.sh"]
 
 CMD ["/bin/sh"]
 
-ARG IMAGE_VERSION=1.0.0
+ARG IMAGE_VER=1.0.0
 ARG BASE_REPOSITORY=sudobmitch/base
 LABEL \
     org.label-schema.docker.cmd="docker run -it --rm ${REGISTRY}/${BASE_REPOSITORY}:alpine" \

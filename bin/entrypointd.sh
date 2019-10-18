@@ -21,14 +21,14 @@ fi
 
 for ep in /etc/entrypoint.d/*; do
   ext="${ep##*.}"
-  if [ "${ext}" = "env" -a -f "${ep}" ]; then
+  if [ "${ext}" = "env" ] && [ -f "${ep}" ]; then
     # source files ending in ".env"
-    echo "Sourcing: ${ep}"
-    set -a && . "${ep}" && set +a
-  elif [ "${ext}" = "sh" -a -x "${ep}" ]; then
+    echo "Sourcing: ${ep} $@"
+    set -a && . "${ep}" "$@" && set +a
+  elif [ "${ext}" = "sh" ] && [ -x "${ep}" ]; then
     # run scripts ending in ".sh"
-    echo "Running: ${ep}"
-    "${ep}"
+    echo "Running: ${ep} $@"
+    "${ep}" "$@"
   fi
 done
 
@@ -59,6 +59,8 @@ fi
 # include gosu with user if requested
 if [ -n "${RUN_AS}" ] && [ "$(id -u)" = "0" ]; then
   set -- gosu "${RUN_AS}" "$@"
+  # fix stdout/stderr permissions to allow non-root user
+  chown --dereference "${RUN_AS}" "/proc/$$/fd/1" "/proc/$$/fd/2" || :
 fi
 
 # run command with exec to pass control

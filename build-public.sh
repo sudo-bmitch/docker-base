@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 REGISTRY=docker.io
 BASE_REPOSITORY=sudobmitch/base
 build_date=$(date +%Y%m%d-%H%M%S)
