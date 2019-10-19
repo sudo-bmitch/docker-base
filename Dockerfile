@@ -21,9 +21,8 @@ RUN curl -sSL https://github.com/vishnubob/wait-for-it/raw/master/wait-for-it.sh
  && chmod 755 /usr/bin/wait-for-it.sh
 
 # Install tini
-ARG TINI_VER=v0.16.1
-RUN curl -sSL https://github.com/krallin/tini/releases/download/${TINI_VER}/tini >/usr/bin/tini \
- && chmod 755 /usr/bin/tini
+RUN apk-install \
+      tini
 
 # Install gosu
 ARG GOSU_VER=1.10
