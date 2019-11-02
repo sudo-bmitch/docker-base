@@ -40,7 +40,7 @@ if [ $# -gt 0 -o \( -z "$opt_e" -a -z "$opt_m" \) ]; then
   usage
 fi
 
-if ! grep -q '1:name=systemd:/docker/' </proc/self/cgroup; then
+if ! grep -q ':name=systemd:/docker/' </proc/self/cgroup; then
   echo "Error: this script is only supported from within a docker container" >&2
   exit 1
 fi
