@@ -1,7 +1,7 @@
 ARG ALPINE_VER=3.9
 ARG DEBIAN_VER=9
-ARG BASE_REPOSITORY=sudobmitch/base
 ARG REGISTRY=docker.io
+ARG REPOSITORY=sudobmitch/base
 ARG RELEASE_IMAGE=debian-base
 
 # Alpine base image version
@@ -43,13 +43,13 @@ ENTRYPOINT ["/usr/bin/entrypointd.sh"]
 CMD ["/bin/sh"]
 
 ARG IMAGE_VER=1.0.0
-ARG BASE_REPOSITORY=sudobmitch/base
+ARG REPOSITORY=sudobmitch/base
 LABEL \
-    org.label-schema.docker.cmd="docker run -it --rm ${REGISTRY}/${BASE_REPOSITORY}:alpine" \
+    org.label-schema.docker.cmd="docker run -it --rm ${REPOSITORY}:alpine" \
     org.label-schema.description="Base image for alpine" \
-    org.label-schema.name="${REGISTRY}/${BASE_REPOSITORY}:alpine" \
+    org.label-schema.name="${REPOSITORY}:alpine" \
     org.label-schema.schema-version="1.0" \
-    org.label-schema.url="https://github.com/sudo-bmitch/docker-images" \
+    org.label-schema.url="https://github.com/sudo-bmitch/docker-base" \
     org.label-schema.vendor="Brandon Mitchell" \
     org.label-schema.version="${IMAGE_VER}"
 
@@ -92,13 +92,13 @@ ENTRYPOINT ["/usr/bin/entrypointd.sh"]
 CMD ["/bin/bash"]
 
 ARG IMAGE_VERSION=1.0.0
-ARG BASE_REPOSITORY=sudobmitch/base
+ARG REPOSITORY=sudobmitch/base
 LABEL \
-    org.label-schema.docker.cmd="docker run -it --rm ${REGISTRY}/${BASE_REPOSITORY}:debian" \
+    org.label-schema.docker.cmd="docker run -it --rm ${REPOSITORY}:debian" \
     org.label-schema.description="Base image for debian" \
-    org.label-schema.name="${REGISTRY}/${BASE_REPOSITORY}:debian" \
+    org.label-schema.name="${REPOSITORY}:debian" \
     org.label-schema.schema-version="1.0" \
-    org.label-schema.url="https://github.com/sudo-bmitch/docker-images" \
+    org.label-schema.url="https://github.com/sudo-bmitch/docker-base" \
     org.label-schema.vendor="Brandon Mitchell" \
     org.label-schema.version="${IMAGE_VER}"
 
@@ -126,9 +126,9 @@ ARG IMAGE_VERSION=1.0.0
 ARG BASE_REPOSITORY=sudobmitch/base
 LABEL \
     org.label-schema.description="Base image for scratch" \
-    org.label-schema.name="${REGISTRY}/${BASE_REPOSITORY}:scratch" \
+    org.label-schema.name="${REPOSITORY}:scratch" \
     org.label-schema.schema-version="1.0" \
-    org.label-schema.url="https://github.com/sudo-bmitch/docker-images" \
+    org.label-schema.url="https://github.com/sudo-bmitch/docker-base" \
     org.label-schema.vendor="Brandon Mitchell" \
     org.label-schema.version="${IMAGE_VER}"
 
