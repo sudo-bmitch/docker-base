@@ -5,7 +5,7 @@ ARG REPOSITORY=sudobmitch/base
 ARG RELEASE_IMAGE=debian-base
 
 # Alpine base image version
-FROM ${REGISTRY}/alpine:${ALPINE_VER} as alpine-base
+FROM ${REGISTRY}/library/alpine:${ALPINE_VER} as alpine-base
 
 # Include apk-install
 COPY bin.alpine/ /usr/bin/
@@ -43,11 +43,12 @@ ENTRYPOINT ["/usr/bin/entrypointd.sh"]
 CMD ["/bin/sh"]
 
 ARG IMAGE_VER=1.0.0
+ARG REGISTRY=docker.io
 ARG REPOSITORY=sudobmitch/base
 LABEL \
-    org.label-schema.docker.cmd="docker run -it --rm ${REPOSITORY}:alpine" \
+    org.label-schema.docker.cmd="docker run -it --rm ${REGISTRY}/${REPOSITORY}:alpine" \
     org.label-schema.description="Base image for alpine" \
-    org.label-schema.name="${REPOSITORY}:alpine" \
+    org.label-schema.name="${REGISTRY}/${REPOSITORY}:alpine" \
     org.label-schema.schema-version="1.0" \
     org.label-schema.url="https://github.com/sudo-bmitch/docker-base" \
     org.label-schema.vendor="Brandon Mitchell" \
@@ -55,7 +56,7 @@ LABEL \
 
 
 # Debian base image version
-FROM ${REGISTRY}/debian:${DEBIAN_VER} as debian-base
+FROM ${REGISTRY}/library/debian:${DEBIAN_VER} as debian-base
 
 # Include apt-install
 COPY bin.debian/ /usr/bin/
@@ -92,11 +93,12 @@ ENTRYPOINT ["/usr/bin/entrypointd.sh"]
 CMD ["/bin/bash"]
 
 ARG IMAGE_VERSION=1.0.0
+ARG REGISTRY=docker.io
 ARG REPOSITORY=sudobmitch/base
 LABEL \
-    org.label-schema.docker.cmd="docker run -it --rm ${REPOSITORY}:debian" \
+    org.label-schema.docker.cmd="docker run -it --rm ${REGISTRY}/${REPOSITORY}:debian" \
     org.label-schema.description="Base image for debian" \
-    org.label-schema.name="${REPOSITORY}:debian" \
+    org.label-schema.name="${REGISTRY}/${REPOSITORY}:debian" \
     org.label-schema.schema-version="1.0" \
     org.label-schema.url="https://github.com/sudo-bmitch/docker-base" \
     org.label-schema.vendor="Brandon Mitchell" \
@@ -106,27 +108,24 @@ LABEL \
 # Scratch base image version
 FROM scratch as scratch-base
 
+# include downloaded utilities
 COPY --from=debian-base \
      /usr/bin/wait-for-it.sh \
      /usr/bin/tini \
      /usr/bin/gosu \
-     /usr/bin/fix-perms \
-     /usr/bin/secret-vars \
-     /usr/bin/entrypointd.sh \
-     /usr/bin/healthcheckd.sh \
-     /usr/bin/load-volume \
-     /usr/bin/save-volume \
-     /usr/bin/stop-on-trigger \
      /usr/bin/
 
-COPY --from=debian-base /etc/entrypoint.d/  /etc/entrypoint.d/
-COPY --from=debian-base /etc/healthcheck.d/ /etc/healthcheck.d/
+# Include scripts and utilities
+COPY bin/ /usr/bin/
+COPY healthcheck.d/ /etc/healthcheck.d/
+COPY entrypoint.d/ /etc/entrypoint.d/
 
 ARG IMAGE_VERSION=1.0.0
-ARG BASE_REPOSITORY=sudobmitch/base
+ARG REGISTRY=docker.io
+ARG REPOSITORY=sudobmitch/base
 LABEL \
     org.label-schema.description="Base image for scratch" \
-    org.label-schema.name="${REPOSITORY}:scratch" \
+    org.label-schema.name="${REGISTRY}/${REPOSITORY}:scratch" \
     org.label-schema.schema-version="1.0" \
     org.label-schema.url="https://github.com/sudo-bmitch/docker-base" \
     org.label-schema.vendor="Brandon Mitchell" \

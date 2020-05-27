@@ -25,15 +25,15 @@ Alpine base image includes:
 
 ## Using /etc/entrypoint.d/
 
-- Files named "*.env" will be sourced if readable and may contain environment
+- Files named `*.env` will be sourced if readable and may contain environment
   variables
-- Files named "*.sh" will be executed if executable
+- Files named `*.sh` will be executed if executable
 - Files will be processed in order
 
 ## Using /etc/healthcheck.d/
 
-- This mirrors entrypoint.d functionality, first sourcing any "*.env" files,
-  and then running all "*.sh" scripts. If any script fails, the healtcheck
+- This mirrors entrypoint.d functionality, first sourcing any `*.env` files,
+  and then running all `*.sh` scripts. If any script fails, the healtcheck
   will fail.
 
 ## Environment variables
@@ -127,6 +127,14 @@ stop-on-trigger -m /etc/certs/host.pem &
 Which would stop the container when the file is modified, and any container
 restart policy would result in a new container running, using that new
 certificate file.
+
+## Certificates
+
+Additional certificate authorities (CA) can be configured by adding the
+certificate file to `/etc/certs.d/` as either a `*.pem` or `*.crt` file.
+This requires the "ca-certificates" package to be installed in the image,
+or at least the `/etc/ssl/certs/ca-certificates.crt` file to be installed.
+The image must also be started by the root user.
 
 ## Examples
 

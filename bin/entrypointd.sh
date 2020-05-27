@@ -32,6 +32,11 @@ for ep in /etc/entrypoint.d/*; do
   fi
 done
 
+# inject certificates
+if [ -d /etc/certs.d ]; then
+  add-certs
+fi
+
 # load any cached volumes
 if [ -f /.volume-cache/volume-list -a ! -f /.volume-cache/volume-list.already-run ]; then
   load-volume -a

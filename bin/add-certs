@@ -1,0 +1,67 @@
+#!/bin/sh
+
+if [ ! -d /etc/certs.d ]; then
+  exit 0
+fi
+
+if [ "$(id -u)" != "0" ] \
+    && ! [ -w "/etc/ssl/certs/" -a -w "/etc/ssl/certs/ca-certificates.crt" ]; then
+  echo "Root required for $(basename $0)"
+  exit 1
+fi
+
+cert_base() {
+  cert="$1"
+  certbase="$(basename "$cert")"
+  certbase="${certbase%.*}"
+  echo "$certbase"
+}
+
+cert_valid() {
+  cert="$1"
+  if [ ! -f "$cert" ]; then
+    return 1
+  fi
+  certext="${cert##*.}"
+  if [ "$certext" != "pem" ] && [ "$certext" != "crt" ]; then
+    return 1
+  fi
+  return 0
+}
+
+
+# debian/ubuntu/alpine with ca-certificates package installed
+if [ -x "$(command -v update-ca-certificates)" ] \
+    && [ "$(id -u)" = "0" ] \
+    && [ -d /usr/local/share/ca-certificates ]; then
+  for cert in /etc/certs.d/*; do
+    if ! cert_valid "$cert"; then continue; fi
+    ln -sf "$cert" "/usr/local/share/ca-certificates/$(cert_base "$cert").crt"
+  done
+  update-ca-certificates
+
+# centos/rhel
+elif [ -x "$(command -v update-ca-trust)" ] \
+    && [ "$(id -u)" = "0" ] \
+    && [ -d /etc/pki/ca-trust/source/anchors/ ]; then
+  for cert in /etc/certs.d/*; do
+    if ! cert_valid "$cert"; then continue; fi
+    ln -sf "$cert" "/etc/pki/ca-trust/source/anchors/$(cert_base "$cert").crt"
+  done
+  udpate-ca-trust
+
+elif [ -f "/etc/ssl/certs/ca-certificates.crt" -a -w "/etc/ssl/certs/" ]; then
+  if [ ! -f "/etc/ssl/certs/ca-certificates.crt.orig" ]; then
+    cp "/etc/ssl/certs/ca-certificates.crt" "/etc/ssl/certs/ca-certificates.crt.orig"
+  else
+    cp "/etc/ssl/certs/ca-certificates.crt.orig" "/etc/ssl/certs/ca-certificates.crt"
+  fi
+  for cert in /etc/certs.d/*; do
+    if ! cert_valid "$cert"; then continue; fi
+    cat "$cert" >>"/etc/ssl/certs/ca-certificates.crt"
+  done
+
+else
+  >&2 echo "WARNING: skipping certificate injection, ca-certificates package missing"
+fi
+
